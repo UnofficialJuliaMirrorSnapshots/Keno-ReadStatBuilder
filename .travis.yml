@@ -1,0 +1,40 @@
+language: julia
+os:
+  - linux
+julia:
+  - 0.6
+notifications:
+  email: false
+git:
+  depth: 99999999
+cache:
+  timeout: 1000
+  directories:
+    - downloads
+env:
+  global:
+    - BINARYBUILDER_DOWNLOADS_CACHE=downloads
+    - BINARYBUILDER_AUTOMATIC_APPLE=false
+sudo: required
+
+# Before anything else, get the latest versions of things
+before_script:
+  - julia -e 'Pkg.clone("https://github.com/JuliaPackaging/BinaryProvider.jl")'
+  - julia -e 'Pkg.clone("https://github.com/JuliaPackaging/BinaryBuilder.jl"); Pkg.build()'
+
+script:
+  - julia build_tarballs.jl
+
+
+deploy:
+    provider: releases
+    api_key:
+        # Note; this api_key is only valid for Keno/ReadStatBuilder; you need
+        # to make your own: https://docs.travis-ci.com/user/deployment/releases/
+        secure: YHZhVz6sqwm3ETb6o3LGUJqrSt+KiGVdqnXC7nvpsWQcK+/AiWlxvXcZB24eANolmDswbfv+vNk2NCbqJtntviJa4DO3iwVdVoBtNKlVveNRSwquaqu1g45Y4N+rzP8sk2+CkrYnK5tHSsh4tQFGwpMR37DQuLNch413jF9KhgGOnojEW5JTr1GbvvcZr1/qqFyBfiBrKnAhrsKnKp44yMWVOyVXRW34myOClaD88fnFYNJ+VZZPtWrk40OaxQqX1yfaCkPsKnQWmsBWSs/wgBy8wbMB0JHSKtVOPRAWhsIjKtHAENmn4hBETBqP5mRXZA1QbQjQ1oWUJqzVM6V5AALLMN6zn9zNVo9OEiKq8S6zmsw73TeuMNaVFtmiXXXdLds2oezYu3jDW2HRXQap5OJ5mTlYsXLKa2kyBnKMXoL9x+WDW15EHx2x+ger7UZgZuBs3SLIBc26sR4t3Nv+QQzywVrSqJZb87AwjNh6i5gvTEzMnhwDma5KimLOv1qjsvScMBdQ6nZ3D9cy1Q2l/SAvZ4AAK6wYiKGcycJ+q0De3uQovbx+Q6DllEaEpZv55GNaUUmLT47Ovp4taByXg7lTngASOelsmswXUlJmsRCIi2JIoXLh6IOvyQz59zITvbyTKLOYzOULu12IxkjjL1UIQGWG7JWiOMFrWI6tA4s=
+    file_glob: true
+    file: products/*.tar.gz
+    skip_cleanup: true
+    on:
+        repo: Keno/ReadStatBuilder
+        tags: true
